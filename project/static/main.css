@@ -1,0 +1,79 @@
+button {
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: 'Ruda', sans-serif;
+    margin-top: 10px;
+    padding: 5px 10px !important;
+    /* Add !important */
+    outline: 0;
+    border: 2px solid #000;
+    border-radius: 3px;
+    color: #fff;
+    background: #000;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 28px;
+    transition-duration: .15s;
+    transition-property: all;
+    transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
+
+button:hover {
+    cursor: pointer;
+    background: #fbc1f5;
+
+}
+
+.uitleg-text {
+    display: flex;
+    margin-left: 450px;
+    margin-right: 450px;
+    justify-content: center;
+}
+
+.uitleg-text p {
+    text-align: center;
+}
+
+.image-row {
+    display: flex;
+    margin-left: 250px;
+    margin-right: 250px;
+}
+
+.image-row p {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 16px;
+}
+
+.image-row span {
+    font-weight: bold;
+}
+
+.image-containerEx {
+    margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.image-containerEx img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.image-info {
+    text-align: center;
+}
+
+.textInfoExp {
+    margin-left: 450px;
+    margin-right: 450px;
+}
+
+.textInfoExp p {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 18px;
+}

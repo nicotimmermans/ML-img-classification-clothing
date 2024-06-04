@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Experimental Page</title>
+    <link rel="stylesheet" href="../static/main.css" />
+    <style>
+      .prediction-correct {
+        color: green;
+      }
+
+      .prediction-incorrect {
+        color: red;
+      }
+
+      .image-row {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+      }
+
+      .image-containerEx {
+        margin: 10px;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="experimental-page">
+      <div id="header-component"></div>
+      <div class="textInfoExp">
+        <button onclick="refreshImages()">Refresh Images</button>
+      </div>
+      <div class="uitleg-text">
+        <p>
+          This app takes images from the Unsplash API, which is limited to 50
+          requests per hour. If no images are displayed, the limit has been
+          reached. Please try again later.
+        </p>
+      </div>
+      <div class="image-row" id="image-row"></div>
+      <div class="image-row" id="image-row-2"></div>
+
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+      <script>
+        const apiKey = "";
+        const queryKeywordsRow1 = [
+          "T-shirt/top",
+          "Bag",
+          "Sneaker",
+          "Dress",
+          "Trouser",
+        ];
+        const queryKeywordsRow2 = [
+          "Coat",
+          "Sandal",
+          "Shirt",
+          "Sneaker",
+          "Bag",
+          "Ankle boot",
+        ];
+        let imagesRow1 = [];
+        let imagesRow2 = [];
+
+        function goToIndex() {
+          console.log("Navigating to the index page");
+        }
+
+        function fetchImages() {
+          Promise.all([
+            Promise.all(queryKeywordsRow1.map(fetchKeywordImage)),
+            Promise.all(queryKeywordsRow2.map(fetchKeywordImage)),
+          ])
+            .then(([resultsRow1, resultsRow2]) => {
+              imagesRow1 = resultsRow1;
+              imagesRow2 = resultsRow2;
+              renderImages();
+            })
+            .catch((error) => {
+              console.error("Error fetching images from Unsplash:", error);
+            });
+        }
+
+        function fetchKeywordImage(keyword) {
+          const url = `https://api.unsplash.com/photos/random?count=1&query=${keyword}`;
+          const headers = { Authorization: `Client-ID ${apiKey}` };
+
+          return axios
+            .get(url, { headers })
+            .then((response) => response.data[0])
+            .catch((error) => {
+              console.error(
+                `Error fetching image for keyword ${keyword}:`,
+                error
+              );
+              return null;
+            });
+        }
+
+        function renderImages() {
+          renderRowImages(imagesRow1, "image-row");
+          renderRowImages(imagesRow2, "image-row-2");
+        }
+
+        function renderRowImages(images, rowId) {
+          const imageRow = document.getElementById(rowId);
+          imageRow.innerHTML = "";
+
+          images.forEach((image, index) => {
+            const imageContainer = document.createElement("div");
+            imageContainer.className = "image-containerEx";
+
+            const imgElement = document.createElement("img");
+            imgElement.id = `image-${rowId}-${index}`;
+            imgElement.src = image.urls.small;
+            imgElement.alt = image.alt_description;
+
+            const imageInfo = document.createElement("div");
+            imageInfo.className = "image-info";
+
+            // Check if the prediction matches the type
+            const predictionClass = image.predictedClass || "Loading...";
+            const typeClass =
+              rowId === "image-row"
+                ? queryKeywordsRow1[index]
+                : queryKeywordsRow2[index];
+            const isPredictionCorrect =
+              predictionClass.toLowerCase() === typeClass.toLowerCase();
+
+            // Add color class based on the match
+            imageInfo.innerHTML = `<p><span>Type: </span>${typeClass}</p><p><span>Prediction: </span><span class="${
+              isPredictionCorrect
+                ? "prediction-correct"
+                : "prediction-incorrect"
+            }">${predictionClass}</span></p>`;
+
+            imageContainer.appendChild(imgElement);
+            imageContainer.appendChild(imageInfo);
+            imageRow.appendChild(imageContainer);
+            predictImage(imgElement, index, rowId);
+          });
+        }
+
+        async function predictImage(imgElement, index, rowId) {
+          try {
+            const response = await axios.post("/predict", {
+              image_url: imgElement.src,
+            });
+            const data = response.data;
+
+            const imagesArray = rowId === "image-row" ? imagesRow1 : imagesRow2;
+            imagesArray[index].predictedClass = data.class_name;
+            renderImages();
+          } catch (error) {
+            console.error("Error predicting:", error);
+          }
+        }
+
+        function refreshImages() {
+          fetchImages();
+        }
+
+        fetchImages();
+      </script>
+    </div>
+  </body>
+</html>
